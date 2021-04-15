@@ -1,5 +1,3 @@
-# TEST
-
 class Matrix:
     def __init__(self, elements = [], num_rows = 0, num_cols = 0):
         self.elements = elements
