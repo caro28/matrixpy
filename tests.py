@@ -97,5 +97,5 @@ class TestMatrixCols(unittest.TestCase):
 
 
 # TODO: how to run main function call?
-unittest.main(verbosity = 5)
+unittest.main(verbosity = 2)
 
