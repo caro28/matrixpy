@@ -1,3 +1,6 @@
+# Prof Bemis said that how we organize the tests is up to us. What I've done 
+# is write a test per method, where possible
+
 from matrixpy_master import Matrix, MatrixRows, MatrixCols
 import unittest
 
@@ -57,7 +60,6 @@ class TestMatrix(unittest.TestCase):
         self.assertEquals(x.num_cols, 3)
 
 
-# TODO: need to run tests for parent class methods in each subclass's test class?
 class TestMatrixRows(unittest.TestCase):
     '''
     Do not test set_elements(self) because set_rows() has already been called
@@ -96,6 +98,7 @@ class TestMatrixCols(unittest.TestCase):
 
 
 
-# TODO: how to run main function call?
-unittest.main(verbosity = 2)
+if __name__ == "__main__":
+    unittest.main(verbosity = 2)
+
 
