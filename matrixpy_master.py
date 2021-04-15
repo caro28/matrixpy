@@ -6,7 +6,13 @@ class Matrix:
     
     def set_elements(self, lst_elements):
         # lst_elements contains elements from row[0][0] to col[n][n]
-        lst_elements = self.elements
+        self.elements = lst_elements
+    
+    def set_numrows(self, num_rows):
+        self.num_rows = num_rows
+    
+    def set_numcols(self, num_cols):
+        self.num_cols = num_cols
 
 class MatrixRows(Matrix):
     def __init__(self, **kwargs):
