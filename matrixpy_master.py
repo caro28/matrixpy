@@ -32,7 +32,8 @@ class MatrixSparse(Matrix):
         '''
         Returns a dict whose values are the non-zero elements of lst_elements
         and keys are a tuple listing their position in the matrix (row, col).
-        TODO: move code building the tuples into a separate method, once this works.
+        TODO: move code building the tuples into a separate method (or 
+        separate file, as a helper function), once this works.
         '''
         non_zero_elem = []
         elem_indices = []
