@@ -16,6 +16,9 @@ def test_Matrix_instance():
 
     return x
 
+def test_MatrixSparse_instance():
+    pass
+
 
 def test_MatrixRows_instance():
     x = MatrixRows(elements=[], num_rows = 0, num_cols = 0)
