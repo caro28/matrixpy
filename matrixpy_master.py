@@ -1,4 +1,4 @@
-from math import floor
+from matrix_sparse_helper import convert_tuple
 
 class Matrix:
     def __init__(self, elements = [], num_rows = 0, num_cols = 0):
@@ -32,8 +32,8 @@ class MatrixSparse(Matrix):
         '''
         Returns a dict whose values are the non-zero elements of lst_elements
         and keys are a tuple listing their position in the matrix (row, col).
-        TODO: move code building the tuples into a separate method (or 
-        separate file, as a helper function), once this works.
+        Use helper function to generate position tuples from 
+        matrix_sparse_helper.py
         '''
         non_zero_elem = []
         elem_indices = []
@@ -47,47 +47,20 @@ class MatrixSparse(Matrix):
                 i += 1
             else:
                 i += 1
-
-        # get row numbers from elem_indices
-        row_num = []
-        for index in elem_indices:
-            if index < self.num_cols:
-                row_num.append(0)
-            elif index == self.num_cols:
-                row_num.append(1)
-            else:
-                row = floor(index / self.num_cols) - 1
-                row_num.append(row)
         
-        # get col numbers from elem_indices
-        col_num = []
-        for index in elem_indices:
-            if index < self.num_cols:
-                col_num.append(index)
-            else:
-                col = index % self.num_cols
-                col_num.append(col)
+        # convert index to tuples listing position in matrix (row, col)
+        matrix_pos_lst = convert_tuple(elem_indices, self.num_cols)
 
-        # TODO: combine row numbers, col numbers into tuples
-
-        # TODO: changes keys so that they are the tuples just created
+        # create dict of non-zero matrix elements
         matrix_dict = {}
-        for j in range(len(elem_indices)):
-            matrix_dict[elem_indices[j]] = non_zero_elem[j]
+        for i in range(len(matrix_pos_lst)):
+            matrix_dict[matrix_pos_lst[i]] = non_zero_elem[i]
 
         return matrix_dict
     
-        
-                
-
     # TODO-question: ok to rename this set_elements()? Would this just override the method in Matrix parent class?
     def set_dict(self):
         self.elements = self.create_dict()
-
-
-
-y = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
-print(y.elements)
 
 
 class MatrixRows(Matrix):
@@ -108,7 +81,6 @@ class MatrixRows(Matrix):
                 nested_lst_rows[i].append(self.elements[j])
                 j += 1
             i += 1
-            #print(i)
         
         self.elements = nested_lst_rows
 

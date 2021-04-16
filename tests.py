@@ -16,7 +16,13 @@ def test_Matrix_instance():
 
     return x
 
+# TODO: build instance and then unittest
 def test_MatrixSparse_instance():
+    '''
+    test case examplle:
+    y = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
+    self.assertEquals(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
+    '''
     pass
 
 
