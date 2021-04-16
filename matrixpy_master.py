@@ -13,6 +13,14 @@ class Matrix:
     
     def set_numcols(self, num_cols):
         self.num_cols = num_cols
+    
+    # TODO: Are these getter methods below necessary? Given that this data is already stored as attributes?
+    def get_numrows(self):
+        return self.num_rows
+    
+    def get_numcols(self):
+        return self.num_cols
+
 
 class MatrixRows(Matrix):
     def __init__(self, **kwargs):
@@ -36,6 +44,8 @@ class MatrixRows(Matrix):
         
         self.elements = nested_lst_rows
 
+    def get_elements_rows(self):
+        return self.elements
 
 class MatrixCols(Matrix):
     def __init__(self, **kwargs):
@@ -65,5 +75,8 @@ class MatrixCols(Matrix):
                 j = len(self.elements)
 
         self.elements = nested_lst_cols
+    
+    def get_elements_cols(self):
+        return self.elements
 
 
