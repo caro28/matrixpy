@@ -19,7 +19,7 @@ def test_Matrix_instance():
 # TODO: build instance and then unittest
 def test_MatrixSparse_instance():
     '''
-    test case examplle:
+    test case example:
     y = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
     self.assertEquals(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
     '''
@@ -73,11 +73,12 @@ class TestMatrixRows(unittest.TestCase):
     '''
     Do not test set_elements(self) because set_rows() has already been called
     '''
-
+    # TODO-question: not needed b/c already tested in parent class?
     def test_setnumrows(self):
         x = test_MatrixRows_instance()
         self.assertEquals(x.num_rows, 3)
     
+    # TODO-question: not needed b/c already tested in parent class?
     def test_setnumcols(self):
         x = test_MatrixRows_instance()
         self.assertEquals(x.num_cols, 3)
@@ -91,16 +92,17 @@ class TestMatrixCols(unittest.TestCase):
     '''
     Do not test set_elements(self) because set_cols() has already been called
     '''
-
+    # TODO-question: not needed b/c already tested in parent class?
     def test_setnumrows(self):
         x = test_MatrixCols_instance()
         self.assertEquals(x.num_rows, 3)
     
+    # TODO-question: not needed b/c already tested in parent class?
     def test_setnumcols(self):
         x = test_MatrixCols_instance()
         self.assertEquals(x.num_cols, 3)
 
-    def test_setrows(self):
+    def test_setcols(self):
         x = test_MatrixCols_instance()
         self.assertEquals(x.elements, [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
 
