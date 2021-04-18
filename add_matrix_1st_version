@@ -1,0 +1,100 @@
+    def add_matrix(self, other):
+        '''
+        Parameters:
+            self
+            other: other Matrix instance
+        Returns:
+            matrix_add: a new Matrix instance
+        '''
+        # check that dimensions of self and other are equal
+        if (self.num_rows != other.num_rows and self.num_cols != other.num_cols):
+            print("Matrices must be same dimension.")
+        else:
+            # SCENARIO 1: sparse + rows
+            if isinstance(self, MatrixSparse) and isinstance(other, MatrixRows) or isinstance(other, MatrixSparse) and isinstance(self, MatrixRows):
+                # create new MatrixRows instance
+                matrix_add = MatrixRows(elements=[], num_rows=0, num_cols=0)
+                # copy elements of MatrixRows instance to matrix_add
+                if isinstance(self, MatrixRows):
+                    matrix_add.elements = self.elements[:]
+                else:
+                    matrix_add.elements = other.elements[:]
+
+                for key in self.elements.keys():
+                    # sum non-zero values of self with corresponding values of matrix_add
+                    sum_elements = self.elements[key] + matrix_add.elements[key[0]][key[1]]
+                    # replace values in matrix_add with new sum
+                    matrix_add.elements[key[0]][key[1]] = sum_elements
+            
+            # SCENARIO 2: sparse + cols --> TODO-move to helper function? copied code from SCENARIO 1
+            elif isinstance(self, MatrixSparse) and isinstance(other, MatrixCols) or isinstance(other, MatrixSparse) and isinstance(self, MatrixCols):
+                # create new MatrixCols instance
+                matrix_add = MatrixCols(elements=[], num_rows=0, num_cols=0)
+                other_transposed = other.transpose()
+                # copy elements of MatrixCols instance to matrix_add
+                if isinstance(self, MatrixCols):
+                    matrix_add.elements = self.elements[:]
+                else:
+                    matrix_add.elements = other_transposed.elements[:]
+
+                for key in self.elements.keys():
+                    # sum non-zero values of self with corresponding values of matrix_add
+                    sum_elements = self.elements[key] + matrix_add.elements[key[0]][key[1]]
+                    # replace values in matrix_add with new sum
+                    matrix_add.elements[key[0]][key[1]] = sum_elements
+
+            # SCENARIO 3: rows + rows OR cols + cols
+            elif isinstance(self, MatrixRows) and isinstance(other, MatrixRows) or isinstance(self, MatrixCols) and isinstance(other, MatrixCols):
+                # create new Matrix instance matching type of self
+                if isinstance(self, MatrixRows):
+                    matrix_add = MatrixRows(elements=[], num_rows=0, num_cols=0)
+                else:
+                    matrix_add = MatrixCols(elements=[], num_rows=0, num_cols=0)
+                
+                # copy elements of self to matrix_add
+                matrix_add.elements = self.elements[:]
+                i = 0
+                j = 0
+                
+                # replace elements of matrix_add with sums of matching elements from self and other
+                while i < len(self.elements):
+                    while j < len(self.elements[i]):
+                        sum_elements = self.elements[i][j] + other.elements[i][j]
+                        matrix_add.elements[i][j] = sum_elements
+                        j += 1
+                    i += 1
+                    j = 0
+
+            # SCENARIO 4: sparse + sparse
+            else:
+                # create new MatrixSparse object
+                matrix_add = MatrixSparse(elements=[], num_rows=0, num_cols=0)
+                matrix_add_keys = []
+                matrix_add_values = []
+
+                for key_self in self.elements.keys():
+                    for key_other in other.elements.keys():
+                        # if keys are equal, sum their values and append to matrix_add
+                        if key_self == key_other:
+                            matrix_add_keys.append(key_self)
+                            sum_values = self.elements[key_self] + other.elements[key_other]
+                            matrix_add_values.append(sum_values)
+                        # append to matrix_add key, value pair from self and other
+                        else:
+                            matrix_add_keys.append(key_self)
+                            matrix_add_values.append(self.elements[key_self])
+                            matrix_add_keys.append(key_other)
+                            matrix_add_values.append(other.elements[key_other])
+
+                # update elements of matrix_add using matrix_add key and value lists
+                for i in range(len(matrix_add_keys)):
+                    matrix_add.elements[matrix_add_keys[i]] = matrix_add_values[i]               
+                
+                # sort by keys
+                matrix_add.elements = dict(sorted(matrix_add.elements.items()))            
+
+            # set attributes of matrix_add
+            matrix_add.set_numrows = self.num_rows
+            matrix_add.set_numcols = self.set_numcols
+
+            return matrix_add

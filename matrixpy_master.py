@@ -16,20 +16,39 @@ class Matrix:
     def set_numcols(self, num_cols):
         self.num_cols = num_cols
     
-    # TODO-question: Are these getter methods below necessary? Given that this data is already stored as attributes?
     def get_numrows(self):
         return self.num_rows
     
     def get_numcols(self):
         return self.num_cols
     
-    def get_index(self, row, col):
+    def get_element(self, row, col):
         '''
         Parameters: row, col of element want to access
         Returns: element at row, col
         '''
-        pass
-    
+        # check data type of self.elements
+        if isinstance(self.elements, list):
+            if isinstance(self, MatrixRows):
+                return self.elements[row][col]
+            else:
+                # col represents outer list
+                mat_transposed = self.transpose()
+                return mat_transposed.elements[row][col]
+
+        else:
+            # access element using keys
+            for key in self.elements.keys():
+                # check if (row, col) corresponds to an existing key
+                if (row, col) == key:
+                    # stop iteration if find matching key
+                    return self.elements[key]
+                else:
+                    # keep iterating until reach end of keys; element = 0 if no match
+                    element = 0
+        
+        return element
+
     def transpose(self):
         '''
         Returns new matrix object
@@ -55,112 +74,88 @@ class Matrix:
 
         return new_matrix
 
-    def add_matrix_TEST(self, other):
+    def add_matrix(self, other, matrix_type):
         '''
-        Alternate to add_matrix() using get_index() --> hoping it's simpler!
-        '''
-        pass
-    
-    def add_matrix(self, other):
-        '''
-        Parameters:
-            self
-            other: other Matrix instance
+        Parameters: 
+            self, other: (Matrix instances)
+            matrix_type: (string) Matrix subclass of returned Matrix object
         Returns:
-            matrix_add: a new Matrix instance
+            matrix_add: (Matrix instance)
         '''
         # check that dimensions of self and other are equal
         if (self.num_rows != other.num_rows and self.num_cols != other.num_cols):
             print("Matrices must be same dimension.")
         else:
-            # SCENARIO 1: sparse + rows
-            if isinstance(self, MatrixSparse) and isinstance(other, MatrixRows) or isinstance(other, MatrixSparse) and isinstance(self, MatrixRows):
-                # create new MatrixRows instance
-                matrix_add = MatrixRows(elements=[], num_rows=0, num_cols=0)
-                # copy elements of MatrixRows instance to matrix_add
-                if isinstance(self, MatrixRows):
-                    matrix_add.elements = self.elements[:]
-                else:
-                    matrix_add.elements = other.elements[:]
+            matrix_add = Matrix(elements=[], num_rows=0, num_cols=0)
 
-                for key in self.elements.keys():
-                    # sum non-zero values of self with corresponding values of matrix_add
-                    sum_elements = self.elements[key] + matrix_add.elements[key[0]][key[1]]
-                    # replace values in matrix_add with new sum
-                    matrix_add.elements[key[0]][key[1]] = sum_elements
-            
-            # SCENARIO 2: sparse + cols --> TODO-move to helper function? copied code from SCENARIO 1
-            elif isinstance(self, MatrixSparse) and isinstance(other, MatrixCols) or isinstance(other, MatrixSparse) and isinstance(self, MatrixCols):
-                # create new MatrixCols instance
-                matrix_add = MatrixCols(elements=[], num_rows=0, num_cols=0)
-                other_transposed = other.transpose()
-                # copy elements of MatrixCols instance to matrix_add
-                if isinstance(self, MatrixCols):
-                    matrix_add.elements = self.elements[:]
-                else:
-                    matrix_add.elements = other_transposed.elements[:]
+            rows = 0
+            cols = 0
 
-                for key in self.elements.keys():
-                    # sum non-zero values of self with corresponding values of matrix_add
-                    sum_elements = self.elements[key] + matrix_add.elements[key[0]][key[1]]
-                    # replace values in matrix_add with new sum
-                    matrix_add.elements[key[0]][key[1]] = sum_elements
+            # add matching elements of self and other
+            while rows < self.num_rows:
+                while cols < self.num_cols:
+                    sum_elements = self.get_element(rows, cols) + other.get_element(rows, cols)
+                    matrix_add.elements.append(sum_elements)
+                    cols += 1
+                rows += 1
+                cols = 0
 
-            # SCENARIO 3: rows + rows OR cols + cols
-            elif isinstance(self, MatrixRows) and isinstance(other, MatrixRows) or isinstance(self, MatrixCols) and isinstance(other, MatrixCols):
-                # create new Matrix instance matching type of self
-                if isinstance(self, MatrixRows):
-                    matrix_add = MatrixRows(elements=[], num_rows=0, num_cols=0)
-                else:
-                    matrix_add = MatrixCols(elements=[], num_rows=0, num_cols=0)
-                
-                # copy elements of self to matrix_add
-                matrix_add.elements = self.elements[:]
-                i = 0
-                j = 0
-                
-                # replace elements of matrix_add with sums of matching elements from self and other
-                while i < len(self.elements):
-                    while j < len(self.elements[i]):
-                        sum_elements = self.elements[i][j] + other.elements[i][j]
-                        matrix_add.elements[i][j] = sum_elements
-                        j += 1
-                    i += 1
-                    j = 0
-
-            # SCENARIO 4: sparse + sparse
+            # organize matrix_add.elements by row, col, or dict
+            if matrix_type == MatrixRows:
+                matrix_add = MatrixRows(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
+            elif matrix_type == MatrixCols:
+                matrix_add = MatrixCols(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
             else:
-                # create new MatrixSparse object
-                matrix_add = MatrixSparse(elements=[], num_rows=0, num_cols=0)
-                matrix_add_keys = []
-                matrix_add_values = []
-
-                for key_self in self.elements.keys():
-                    for key_other in other.elements.keys():
-                        # if keys are equal, sum their values and append to matrix_add
-                        if key_self == key_other:
-                            matrix_add_keys.append(key_self)
-                            sum_values = self.elements[key_self] + other.elements[key_other]
-                            matrix_add_values.append(sum_values)
-                        # append to matrix_add key, value pair from self and other
-                        else:
-                            matrix_add_keys.append(key_self)
-                            matrix_add_values.append(self.elements[key_self])
-                            matrix_add_keys.append(key_other)
-                            matrix_add_values.append(other.elements[key_other])
-
-                # update elements of matrix_add using matrix_add key and value lists
-                for i in range(len(matrix_add_keys)):
-                    matrix_add.elements[matrix_add_keys[i]] = matrix_add_values[i]               
+                matrix_add = MatrixSparse(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
                 
-                # sort by keys
-                matrix_add.elements = dict(sorted(matrix_add.elements.items()))            
-
-            # set attributes of matrix_add
-            matrix_add.set_numrows = self.num_rows
-            matrix_add.set_numcols = self.set_numcols
-
             return matrix_add
+    
+    def scalar_multiply(self, num):
+        '''
+        Parameters:
+            num: (int or float) number to multiply against self
+        Returns:
+            mat_scaled: (Matrix object) new matrix object
+        
+        TODO: cleaner/easier way to deal with different data types?
+        '''
+        # create a new matrix object
+        mat_scaled = Matrix(elements=[], num_rows=0, num_cols=0)
+        
+        # check type of self
+        if isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
+            # create copy of self.elements
+            mat_scaled.elements = self.elements[:]
+
+            i = 0
+            j = 0
+
+            while i < len(mat_scaled.elements):
+                while j < len(mat_scaled.elements[i]):
+                    mat_scaled.elements[i][j] *= num
+                    j += 1
+                i += 1
+                j = 0
+        
+        elif isinstance(self, MatrixSparse):
+            mat_scaled.elements = self.elements.copy()
+            print(mat_scaled.elements)
+
+            for key in mat_scaled.elements.keys():
+                mat_scaled.elements[key] *= num
+        
+        # if isinstance(self, Matrix)
+        else:
+            # create copy of self.elements
+            mat_scaled.elements = self.elements[:]
+            for i in range(len(mat_scaled.elements)):
+                mat_scaled.elements[i] *= num
+        
+        # set attributes of mat_scaled
+        mat_scaled.set_numrows(self.num_rows)
+        mat_scaled.set_numcols(self.num_cols)
+
+        return mat_scaled
 
 
 class MatrixSparse(Matrix):
@@ -224,7 +219,6 @@ class MatrixRows(Matrix):
         
         self.elements = nested_lst_rows
 
-    # TODO-question: need this? Given that this data is already stored as attribute?
     def get_elements_rows(self):
         return self.elements
 
@@ -258,24 +252,28 @@ class MatrixCols(Matrix):
 
         self.elements = nested_lst_cols
     
-    # TODO-question: need this? Given that this data is already stored as attribute?
     def get_elements_cols(self):
         return self.elements
 
 
 
-mat_sparse = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
-mat_sparse_2 = MatrixSparse(elements = [0, 3, 0, 0, 2, 0, 0, 0, 2], num_rows=3, num_cols=3)
+mat_sparse = MatrixSparse(elements=[0, 0, 0, 4, 0, 0, 5, 0, 6], num_rows=3, num_cols=3)
+mat_sparse_2 = MatrixSparse(elements = [0, 3, 0, 0, 1, 0, 0, 0, 2], num_rows=3, num_cols=3)
 mat_rows = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_rows_copy = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_cols = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_cols_copy = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
-
-#print(mat_sparse.elements)
-#print(mat_sparse_2.elements)
-new_mat = mat_sparse.add_matrix(mat_sparse_2)
-print(new_mat.elements)
+mat_simple = Matrix(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 
 #mat_sparse.elements = {(1, 0): 3, (2, 0): 5, (2, 2): 3}
+#mat_sparse_2.elements = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
 #mat_rows.elements = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 #mat_cols.elements = [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
+
+# test add_matrix()
+new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
+#print(new_mat.elements)
+
+# test scalar_multiply()
+new_mat = mat_simple.scalar_multiply(3)
+print(new_mat.elements)
