@@ -5,7 +5,7 @@ class Matrix:
         self.elements = elements
         self.num_rows = num_rows
         self.num_cols = num_cols
-    
+
     def set_elements(self, lst_elements):
         # lst_elements contains elements from row[0][0] to col[n][n]
         self.elements = lst_elements
@@ -22,13 +22,16 @@ class Matrix:
     def get_numcols(self):
         return self.num_cols
     
+    def change_matrix_shape(self, matrix_type):
+        pass
+
     def get_element(self, row, col):
         '''
         Parameters: row, col of element want to access
         Returns: element at row, col
         '''
-        # check data type of self.elements
-        if isinstance(self.elements, list):
+        # if elements are in nested list
+        if isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
             if isinstance(self, MatrixRows):
                 return self.elements[row][col]
             else:
@@ -36,6 +39,12 @@ class Matrix:
                 mat_transposed = self.transpose()
                 return mat_transposed.elements[row][col]
 
+        # elements are in simple list
+        elif isinstance(self, Matrix):
+            # based on Prof Bemis's lecture 10
+            return self.elements[row * self.num_rows + col]     
+
+        # elements are in dict
         else:
             # access element using keys
             for key in self.elements.keys():
@@ -55,7 +64,7 @@ class Matrix:
         '''
         # create new Matrix object
         new_matrix = Matrix(elements=[], num_rows=0, num_cols=0)
-
+        
         nested_lst = [[] for i in range(len(self.elements))]
 
         i = 0
@@ -110,7 +119,6 @@ class Matrix:
                 
             return matrix_add
 
-
     def subtract_matrix(self, other, matrix_type):
         '''
         Parameters: 
@@ -121,7 +129,6 @@ class Matrix:
         '''
         other.scalar_multiply(-1)
         return self.add_matrix(other, matrix_type)
-            
     
     def scalar_multiply(self, num):
         '''
@@ -129,13 +136,11 @@ class Matrix:
             num: (int or float) number to multiply against self
         Returns:
             mat_scaled: (Matrix object) new matrix object
-        
-        TODO: cleaner/easier way to deal with different data types?
         '''
         # create a new matrix object
         mat_scaled = Matrix(elements=[], num_rows=0, num_cols=0)
         
-        # check type of self
+        # check type of self - nested list
         if isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
             # create copy of self.elements
             mat_scaled.elements = self.elements[:]
@@ -150,15 +155,14 @@ class Matrix:
                 i += 1
                 j = 0
         
-        elif isinstance(self, MatrixSparse):
+        elif isinstance(self, MatrixSparse): # dict
             mat_scaled.elements = self.elements.copy()
             print(mat_scaled.elements)
 
             for key in mat_scaled.elements.keys():
                 mat_scaled.elements[key] *= num
         
-        # if isinstance(self, Matrix)
-        else:
+        else: # simple list
             # create copy of self.elements
             mat_scaled.elements = self.elements[:]
             for i in range(len(mat_scaled.elements)):
@@ -170,7 +174,6 @@ class Matrix:
 
         return mat_scaled
 
-
     def scalar_divide(self, num):
         '''
         Parameters:
@@ -178,50 +181,33 @@ class Matrix:
         Returns:
             mat_scaled: (Matrix object) new matrix object
         '''
-        
         new_num = 1/num
         return self.scalar_multiply(new_num)
 
-
-    def dot_product(self, other, matrix_type):
+    def slice_matrix(self, row_start, row_finish, col_start, col_finish):
         '''
-        Parameters: 
-            self, other: (Matrix instances)
-            matrix_type: (string) Matrix subclass of returned Matrix object
+        TODO: build by data type here too?
+        '''
+        pass
+
+    def dot_product(self, row, col):
+        '''
+        Parameters:
+            row, col: (lists)
         Returns:
-            matrix_dot_product: (Matrix instance)
+            dot_product (int or float)
         '''
-        # check that dimensions of self and other are equal
-        if (self.num_cols != other.num_rows):
-            print("Matrices must be same dimension.")
+        # check that dimensions of row and col are equal
+        if len(row) != len(col):
+            print("Inputs must be same dimension.")
         else:
-            matrix_dot_product = Matrix(elements=[], num_rows=0, num_cols=0)
-
-            rows = 0
-            cols = 0
-            doc_prod = 0
-            
-            # doc product between self and other
-            for i in range(0, self.num_rows * self.num_cols):
-                while rows < self.num_rows:
-
-                    dot_product_elements = self.get_element(cols, rows) * other.get_element(rows, cols)
-                    doc_prod += dot_product_elements                    
-                    rows += 1
-                cols = 0
+            i = 0
+            dot_product = 0
+            while i < len(row):
+                dot_product += row[i] * col[i]
                 i += 1
-            print(doc_prod)    
-            
-
-            # organize matrix_add.elements by row, col, or dict
-            if matrix_type == MatrixRows:
-                matrix_dot_product = MatrixRows(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-            elif matrix_type == MatrixCols:
-                matrix_dot_product = MatrixCols(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-            else:
-                matrix_dot_product = MatrixSparse(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-                
-            return matrix_dot_product
+        
+        return dot_product
 
 
     def multiply_matrix(self, other, matrix_type):
@@ -231,10 +217,15 @@ class Matrix:
             matrix_type: (string) Matrix subclass of returned Matrix object
         Returns:
             matrix_multiply: (Matrix instance)
+        TODO: Use dot_product() to perform each row/col operation
         '''
         pass
 
-
+    def multiply_n_matrices(self, other_list):
+        '''
+        TODO: build this? method to multiply more than one matrix?
+        '''
+        pass
 
 
 class MatrixSparse(Matrix):
@@ -335,7 +326,7 @@ class MatrixCols(Matrix):
         return self.elements
 
 
-
+# TESTS
 mat_sparse = MatrixSparse(elements=[0, 0, 0, 4, 0, 0, 5, 0, 6], num_rows=3, num_cols=3)
 mat_sparse_2 = MatrixSparse(elements = [0, 3, 0, 0, 1, 0, 0, 0, 2], num_rows=3, num_cols=3)
 mat_rows = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
@@ -344,7 +335,6 @@ mat_cols = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols
 mat_cols_copy = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_simple = Matrix(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_cols=3)
-
 
 #mat_sparse.elements = {(1, 0): 3, (2, 0): 5, (2, 2): 3}
 #mat_sparse_2.elements = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
@@ -373,5 +363,5 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 
 
 # test dot_product()
-new_mat = mat_rows.dot_product(mat_simple2, MatrixRows)
-print(new_mat.elements)
+#new_mat = mat_rows.dot_product(mat_simple2, MatrixRows)
+#print(new_mat.elements)
