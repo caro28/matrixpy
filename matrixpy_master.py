@@ -109,6 +109,19 @@ class Matrix:
                 matrix_add = MatrixSparse(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
                 
             return matrix_add
+
+
+    def subtract_matrix(self, other, matrix_type):
+        '''
+        Parameters: 
+            self, other: (Matrix instances)
+            matrix_type: (string) Matrix subclass of returned Matrix object
+        Returns:
+            matrix_subtract: (Matrix instance)
+        '''
+        other.scalar_multiply(-1)
+        return self.add_matrix(other, matrix_type)
+            
     
     def scalar_multiply(self, num):
         '''
@@ -156,6 +169,72 @@ class Matrix:
         mat_scaled.set_numcols(self.num_cols)
 
         return mat_scaled
+
+
+    def scalar_divide(self, num):
+        '''
+        Parameters:
+            num: (int or float) number to divide against self
+        Returns:
+            mat_scaled: (Matrix object) new matrix object
+        '''
+        
+        new_num = 1/num
+        return self.scalar_multiply(new_num)
+
+
+    def dot_product(self, other, matrix_type):
+        '''
+        Parameters: 
+            self, other: (Matrix instances)
+            matrix_type: (string) Matrix subclass of returned Matrix object
+        Returns:
+            matrix_dot_product: (Matrix instance)
+        '''
+        # check that dimensions of self and other are equal
+        if (self.num_cols != other.num_rows):
+            print("Matrices must be same dimension.")
+        else:
+            matrix_dot_product = Matrix(elements=[], num_rows=0, num_cols=0)
+
+            rows = 0
+            cols = 0
+            doc_prod = 0
+            
+            # doc product between self and other
+            for i in range(0, self.num_rows * self.num_cols):
+                while rows < self.num_rows:
+
+                    dot_product_elements = self.get_element(cols, rows) * other.get_element(rows, cols)
+                    doc_prod += dot_product_elements                    
+                    rows += 1
+                cols = 0
+                i += 1
+            print(doc_prod)    
+            
+
+            # organize matrix_add.elements by row, col, or dict
+            if matrix_type == MatrixRows:
+                matrix_dot_product = MatrixRows(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
+            elif matrix_type == MatrixCols:
+                matrix_dot_product = MatrixCols(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
+            else:
+                matrix_dot_product = MatrixSparse(elements=matrix_dot_product.elements, num_rows=self.num_rows, num_cols=self.num_cols)
+                
+            return matrix_dot_product
+
+
+    def multiply_matrix(self, other, matrix_type):
+        '''
+        Parameters: 
+            self, other: (Matrix instances)
+            matrix_type: (string) Matrix subclass of returned Matrix object
+        Returns:
+            matrix_multiply: (Matrix instance)
+        '''
+        pass
+
+
 
 
 class MatrixSparse(Matrix):
@@ -264,16 +343,35 @@ mat_rows_copy = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num
 mat_cols = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_cols_copy = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_simple = Matrix(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
+mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_cols=3)
+
 
 #mat_sparse.elements = {(1, 0): 3, (2, 0): 5, (2, 2): 3}
 #mat_sparse_2.elements = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
 #mat_rows.elements = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 #mat_cols.elements = [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
 
+
 # test add_matrix()
-new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
+# new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
 #print(new_mat.elements)
 
+
+# test subtract_matrix()
+# new_mat = mat_rows.subtract_matrix(mat_simple2, MatrixRows)
+# print(new_mat.elements)
+
+
 # test scalar_multiply()
-new_mat = mat_simple.scalar_multiply(3)
+# new_mat = mat_simple.scalar_multiply(3)
+# print(new_mat.elements)
+
+
+# test scalar_divide()
+# new_mat = mat_sparse.scalar_divide(-2)
+# print(new_mat.elements)
+
+
+# test dot_product()
+new_mat = mat_rows.dot_product(mat_simple2, MatrixRows)
 print(new_mat.elements)

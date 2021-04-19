@@ -43,3 +43,5 @@ def test(x, row, col):
 
 x = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
 print(test(x, 1, 1))
+
+
