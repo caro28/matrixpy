@@ -1,7 +1,7 @@
 # Prof Bemis said that how we organize the tests is up to us. What I've done 
 # is write a test per method, where possible
 
-from matrixpy_master import Matrix, MatrixRows, MatrixCols
+from matrixpy_master import Matrix, MatrixRows, MatrixCols, MatrixSparse
 import unittest
 
 def test_Matrix_instance():
@@ -67,6 +67,13 @@ class TestMatrix(unittest.TestCase):
     def test_setnumcols(self):
         x = test_Matrix_instance()
         self.assertEquals(x.num_cols, 3)
+    
+    def test_getnumrows(self):
+        x = test_Matrix_instance()
+        self.assertEquals(x.get_numrows(), 3)
+    
+    def test_getelements(self):
+        pass
 
 
 class TestMatrixRows(unittest.TestCase):
@@ -86,6 +93,9 @@ class TestMatrixRows(unittest.TestCase):
     def test_setrows(self):
         x = test_MatrixRows_instance()
         self.assertEquals(x.elements, [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    
+    def test_getelements(self):
+        pass
 
 
 class TestMatrixCols(unittest.TestCase):
@@ -106,6 +116,8 @@ class TestMatrixCols(unittest.TestCase):
         x = test_MatrixCols_instance()
         self.assertEquals(x.elements, [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
 
+    def test_getelements(self):
+        pass
 
 
 

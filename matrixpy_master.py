@@ -10,6 +10,9 @@ class Matrix:
         # lst_elements contains elements from row[0][0] to col[n][n]
         self.elements = lst_elements
     
+    def get_elements(self):
+        return self.elements
+    
     def set_numrows(self, num_rows):
         self.num_rows = num_rows
     
@@ -24,11 +27,14 @@ class Matrix:
     
     def change_matrix_shape(self, matrix_type):
         pass
-
+    
+    # TODO: change method name -- too similar to get_elements()
     def get_element(self, row, col):
         '''
-        Parameters: row, col of element want to access
-        Returns: element at row, col
+        Parameters: 
+            row, col: (int) row, col of element want to access
+        Returns: 
+            element: (int or float) element at (row, col)
         '''
         # if elements are in nested list
         if isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
@@ -186,9 +192,72 @@ class Matrix:
 
     def slice_matrix(self, row_start, row_finish, col_start, col_finish):
         '''
-        TODO: build by data type here too?
+        Parameters:
+            row_start, row_finish, col_start, col_finish: (int) row or col index
+        Returns:
+            sliced_elements: (list or nested list) inclusive of row_finish and col_finish
+                if sliced_elements is nested, default is organized by rows  TODO: problem with MatrixSparse?
         '''
-        pass
+        # check Matrix instance type
+        if isinstance(self, MatrixSparse):
+            sliced_elements = {}
+            sliced_keys = []
+            sliced_values = []
+            for key in self.elements.keys():
+                # key/value pairs to include in slice
+                #if key[0] >= row_start and key[1] <= col_finish:
+                if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
+                    sliced_keys.append(key)
+                    sliced_values.append(self.elements[key])
+                
+                else:
+                    # TODO: pass or continue here?
+                    continue
+            
+            # populate dict
+            for i in range(len(sliced_keys)):
+                sliced_elements[sliced_keys[i]] = sliced_values[i]
+
+        else:
+            sliced_elements = []
+            i = 0
+
+            # if slicing a single row
+            if row_start == row_finish:
+                while i < (col_finish + 1):
+                    element = self.get_element(row_start, col_start)
+                    sliced_elements.append(element)
+                    i += 1
+                    col_start += 1
+        
+            # if slicing a single col
+            elif col_start == col_finish:
+                while i < (row_finish + 1):
+                    element = self.get_element(row_start, col_start)
+                    sliced_elements.append(element)
+                    i += 1
+                    row_start += 1
+
+            # if slicing rows and columns
+            else:
+                # initialize nested list with len == num_rows in slice
+                sliced_elements = [[] for i in range(row_finish + 1)]
+                i = 0
+                j = 0
+
+                while i < (row_finish + 1):
+                    while j < (col_finish + 1):
+                        element = self.get_element(row_start, col_start)
+                        sliced_elements[i].append(element)
+                        j += 1
+                        col_start += 1
+                    i += 1
+                    j = 0
+                    row_start += 1
+                    col_start = 0
+    
+        return sliced_elements
+
 
     def dot_product(self, row, col):
         '''
@@ -220,6 +289,7 @@ class Matrix:
         TODO: Use dot_product() to perform each row/col operation
         '''
         pass
+
 
     def multiply_n_matrices(self, other_list):
         '''
@@ -289,9 +359,6 @@ class MatrixRows(Matrix):
         
         self.elements = nested_lst_rows
 
-    def get_elements_rows(self):
-        return self.elements
-
 
 class MatrixCols(Matrix):
     def __init__(self, **kwargs):
@@ -322,9 +389,6 @@ class MatrixCols(Matrix):
 
         self.elements = nested_lst_cols
     
-    def get_elements_cols(self):
-        return self.elements
-
 
 # TESTS
 mat_sparse = MatrixSparse(elements=[0, 0, 0, 4, 0, 0, 5, 0, 6], num_rows=3, num_cols=3)
@@ -336,11 +400,10 @@ mat_cols_copy = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num
 mat_simple = Matrix(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_cols=3)
 
-#mat_sparse.elements = {(1, 0): 3, (2, 0): 5, (2, 2): 3}
+#mat_sparse.elements = {(1, 0): 4, (2, 0): 5, (2, 2): 6}
 #mat_sparse_2.elements = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
 #mat_rows.elements = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 #mat_cols.elements = [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-
 
 # test add_matrix()
 # new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
@@ -365,3 +428,6 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 # test dot_product()
 #new_mat = mat_rows.dot_product(mat_simple2, MatrixRows)
 #print(new_mat.elements)
+
+# test slice_matrix()
+print(mat_sparse.slice_matrix(1, 2, 1, 2))
