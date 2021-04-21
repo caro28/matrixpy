@@ -457,7 +457,7 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 
 # test add_matrix()
 # new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
-#print(new_mat.elements)
+# print(new_mat.elements)
 
 
 # test subtract_matrix()
