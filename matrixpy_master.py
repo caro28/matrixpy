@@ -1,4 +1,5 @@
 from matrix_sparse_helper import convert_tuple
+from matrix_parent_helper import nstd_to_simple
 
 class Matrix:
     def __init__(self, elements = [], num_rows = 0, num_cols = 0):
@@ -26,8 +27,31 @@ class Matrix:
         return self.num_cols
     
     def change_matrix_shape(self, matrix_type):
-        pass
-    
+        '''
+        Parameters:
+            matrix_type: (str) requested Matrix subclass of output
+        Returns:
+            new matrix object
+        '''
+        # print error message if matrix_type == type(self)
+        if isinstance(self, matrix_type):
+            print("matrix_type must be a different Matrix subclass")
+        
+        # convert input data type to simple list
+        # TODO: do get_dct_lst() and get_simple_lst() need to go under Matrix parent class? 
+        # Getting error message (without impacting code) that Matrix has no 'member' corresponding to these methods.
+        elif isinstance(self, MatrixSparse):
+            simple_lst = self.get_dct_lst()
+
+        elif isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
+            simple_lst = self.get_simple_lst()
+        
+        else:
+            simple_lst = self.elements
+
+        return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
+
+
     # TODO: change method name -- too similar to get_elements()
     def get_element(self, row, col):
         '''
@@ -45,13 +69,8 @@ class Matrix:
                 mat_transposed = self.transpose()
                 return mat_transposed.elements[row][col]
 
-        # elements are in simple list
-        elif isinstance(self, Matrix):
-            # based on Prof Bemis's lecture 10
-            return self.elements[row * self.num_rows + col]     
-
         # elements are in dict
-        else:
+        elif isinstance(self, MatrixSparse):
             # access element using keys
             for key in self.elements.keys():
                 # check if (row, col) corresponds to an existing key
@@ -61,11 +80,19 @@ class Matrix:
                 else:
                     # keep iterating until reach end of keys; element = 0 if no match
                     element = 0
-        
+            
+        # elements are in simple list
+        else:
+            # based on Prof Bemis's lecture 10
+            return self.elements[row * self.num_rows + col]
+
         return element
+
 
     def transpose(self):
         '''
+        # TODO: mutate object instead? In change shape, when converting MatrixCols to simple list, 
+        # means creating new matrix object - original matrix doesn't change shape.
         Returns new matrix object
         '''
         # create new Matrix object
@@ -196,7 +223,7 @@ class Matrix:
             row_start, row_finish, col_start, col_finish: (int) row or col index
         Returns:
             sliced_elements: (list or nested list) inclusive of row_finish and col_finish
-                if sliced_elements is nested, default is organized by rows  TODO: problem with MatrixSparse?
+                if sliced_elements is nested, default is organized by rows
         '''
         # check Matrix instance type
         if isinstance(self, MatrixSparse):
@@ -205,7 +232,6 @@ class Matrix:
             sliced_values = []
             for key in self.elements.keys():
                 # key/value pairs to include in slice
-                #if key[0] >= row_start and key[1] <= col_finish:
                 if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
                     sliced_keys.append(key)
                     sliced_values.append(self.elements[key])
@@ -303,6 +329,7 @@ class MatrixSparse(Matrix):
         super().__init__(**kwargs)
         self.set_dict()
     
+    # TODO-question: need to sort dict by keys here so that iterating through keys elsewhere will preserve keys' order?
     def create_dict(self):
         '''
         Returns a dict whose values are the non-zero elements of lst_elements
@@ -337,6 +364,21 @@ class MatrixSparse(Matrix):
     def set_dict(self):
         self.elements = self.create_dict()
 
+    def get_dct_lst(self):
+        lst_elements = []
+    
+        i = 0
+        j = 0
+
+        while i < self.num_rows:
+            while j < self.num_cols:
+                element = self.get_element(i, j)
+                lst_elements.append(element)
+                j += 1
+            i += 1
+            j = 0
+        
+        return lst_elements
 
 class MatrixRows(Matrix):
     def __init__(self, **kwargs):
@@ -358,6 +400,9 @@ class MatrixRows(Matrix):
             i += 1
         
         self.elements = nested_lst_rows
+    
+    def get_simple_lst(self):
+        return nstd_to_simple(self.elements, self.num_rows, self.num_cols)
 
 
 class MatrixCols(Matrix):
@@ -388,6 +433,11 @@ class MatrixCols(Matrix):
                 j = len(self.elements)
 
         self.elements = nested_lst_cols
+    
+    # TODO: ok to use same name as in MatrixRows?
+    def get_simple_lst(self):
+        transposed = self.transpose()
+        return nstd_to_simple(transposed.set_elements, transposed.num_rows, transposed.num_cols)
     
 
 # TESTS
@@ -430,4 +480,13 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 #print(new_mat.elements)
 
 # test slice_matrix()
-print(mat_sparse.slice_matrix(1, 2, 1, 2))
+#print(mat_sparse.slice_matrix(1, 2, 1, 2))
+
+# test change_matrix_shape()
+test1 = mat_simple.change_matrix_shape(MatrixRows)
+test2 = mat_rows.change_matrix_shape(MatrixSparse)
+test3 = mat_sparse.change_matrix_shape(MatrixCols)
+print(test3.elements)
+
+# test get_element_lst()
+#print(mat_sparse.get_elements_lst())
