@@ -16,7 +16,6 @@ def test_Matrix_instance():
 
     return x
 
-# TODO: build instance and then unittest
 def test_MatrixSparse_instance():
     x = MatrixSparse(elements=[], num_rows=0, num_cols=0)
 
@@ -25,12 +24,6 @@ def test_MatrixSparse_instance():
     x.set_elements(lst_elements)
     x.set_numrows(3)
     x.set_numcols(3)
-
-    '''
-    test case example:
-    y = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
-    self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
-    '''
     
     # organize non-zero elements by key/values (dict)
     x.set_dict()
@@ -49,7 +42,6 @@ def test_MatrixRows_instance():
     x.set_rows()
 
     return x
-
 
 def test_MatrixCols_instance():
     x = MatrixCols(elements=[], num_rows = 0, num_cols = 0)
@@ -93,40 +85,87 @@ class TestMatrix(unittest.TestCase):
 
     def test_changematrixshape(self):
         x = test_Matrix_instance()
-        self.assertEqual(x.change_matrix_shape(MatrixCols).get_elements(), [[1, 4, 7], [2, 5, 8], [3, 6, 9]]) # >> REVIEW
+        self.assertEqual(x.change_matrix_shape(MatrixCols).get_elements(), [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
+        self.assertEqual(x.change_matrix_shape(MatrixRows).get_elements(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        self.assertEqual(x.change_matrix_shape(MatrixSparse).get_elements(), {(0, 0): 1, (0, 1): 2, (0, 2): 3, (1, 0): 4, (1, 1): 5, (1, 2): 6, (2, 0): 7, (2, 1): 8, (2, 2): 9})
     
-    def test_getelement(self):
+    def test_getvalue(self):
         x = test_Matrix_instance()
-        self.assertEqual(x.get_element(2,2), 9)
+        self.assertEqual(x.get_value(2,2), 9)
 
     def test_transpose(self):
         x = test_MatrixRows_instance()
         self.assertEqual(x.transpose().get_elements(), [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
     
     def test_addmatrix(self):
-        x = test_Matrix_instance()
-        other = test_MatrixRows_instance()
-        self.assertEqual(x.add_matrix(other, MatrixCols).get_elements(), [[2, 8, 14], [4, 10, 16], [6, 12, 18]])
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        other1 = test_MatrixRows_instance()
+        other2 = test_MatrixCols_instance()
+        other3 = test_MatrixSparse_instance()
+        self.assertEqual(x1.add_matrix(other1).get_elements(), [[2, 4, 6], [8, 10, 12], [14, 16, 18]])
+        self.assertEqual(x2.add_matrix(other2).get_elements(), [[1, 2, 3], [7, 5, 6], [12, 8, 12]])
+        self.assertEqual(x1.add_matrix(other3).get_elements(), [[1, 2, 3], [7, 5, 6], [12, 8, 12]])
 
     def test_subtractmatrix(self):
-        x = test_Matrix_instance()
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        other1 = test_MatrixRows_instance()
+        other2 = test_MatrixCols_instance()
+        other3 = test_MatrixSparse_instance()
+        self.assertEqual(x1.subtract_matrix(other1).get_elements(), [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        self.assertEqual(x2.subtract_matrix(other2).get_elements(), [[-1, -2, -3], [-1, -5, -6], [-2, -8, -6]])
+        self.assertEqual(x1.subtract_matrix(other3).get_elements(), [[1, 2, 3], [1, 5, 6], [2, 8, 6]])
 
     def test_scalar_multiply(self):
-        x = test_Matrix_instance()
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        x3 = test_MatrixRows_instance()
+        x4 = test_MatrixCols_instance()
+        self.assertEqual(x1.scalar_multiply(-1).get_elements(), [-1, -2, -3, -4, -5, -6, -7, -8, -9])
+        self.assertEqual(x2.scalar_multiply(2).get_elements(), {(1, 0): 6, (2, 0): 10, (2, 2): 6})
+        self.assertEqual(x3.scalar_multiply(0).get_elements(), [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        self.assertEqual(x4.scalar_multiply(-2).get_elements(), [[-2, -8, -14], [-4, -10, -16], [-6, -12, -18]])
 
     def test_scalar_divide(self):
-        x = test_Matrix_instance()
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        x3 = test_MatrixRows_instance()
+        x4 = test_MatrixCols_instance()
+        self.assertEqual(x1.scalar_divide(-1).get_elements(), [-1, -2, -3, -4, -5, -6, -7, -8, -9])
+        self.assertEqual(x2.scalar_divide(2).get_elements(), {(1, 0): 1.5, (2, 0): 2.5, (2, 2): 1.5})
+        self.assertEqual(x3.scalar_divide(1).get_elements(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        self.assertEqual(x4.scalar_divide(-2).get_elements(), [[-0.5, -2, -3.5], [-1, -2.5, -4], [-1.5, -3, -4.5]])
 
     def test_slicematrix(self):
-        x = test_Matrix_instance()
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        x3 = test_MatrixRows_instance()
+        x4 = test_MatrixCols_instance()
+        self.assertEqual(x1.slice_matrix(0, 2, 1, 2), [[2, 3, 4], [4, 5, 6], [7, 8, 9]])
+        self.assertEqual(x2.slice_matrix(1, 2, 1, 2), {(2, 2): 3})
+        self.assertEqual(x3.slice_matrix(2, 2, 0, 2), [7, 8, 9])
+        self.assertEqual(x4.slice_matrix(0, 0, 1, 2), [2, 3])
 
-    def test_docproduct(self):
-        x = test_Matrix_instance()    
+    def test_dotproduct(self):
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        x3 = test_MatrixRows_instance()
+        slice1 = x1.slice_matrix(0, 0, 0, 2)
+        slice2 = x2.slice_matrix(1, 2, 0, 0)
+        slice3 = x3.slice_matrix(0, 2, 1, 1)
+        self.assertEqual(x1.dot_product(slice1, slice3), 36)
+        self.assertEqual(x1.dot_product(slice1, slice2), None)
 
     def test_multiplymatrix(self):
-        x = test_Matrix_instance()
+        x1 = test_Matrix_instance()
+        x2 = test_MatrixSparse_instance()
+        x3 = test_MatrixRows_instance()
+        x4 = test_MatrixCols_instance()
+        self.assertEqual(x1.multiply_matrix(x3), [[30, 36, 42], [66, 81, 96], [102, 126, 150]])
+        self.assertEqual(x2.multiply_matrix(x4), )
 
-    def test_multiplymmatrix(self):
+    def test_multiplynmatrix(self):
         x = test_Matrix_instance()                              
 
 

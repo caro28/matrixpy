@@ -52,8 +52,7 @@ class Matrix:
         return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
 
 
-    # TODO: change method name -- too similar to get_elements()
-    def get_element(self, row, col):
+    def get_value(self, row, col):
         '''
         Parameters: 
             row, col: (int) row, col of element want to access
@@ -65,9 +64,11 @@ class Matrix:
             if isinstance(self, MatrixRows):
                 return self.elements[row][col]
             else:
+                # TODO: necessary to transpose? instead, return self.elements[col][row]
                 # col represents outer list
-                mat_transposed = self.transpose()
-                return mat_transposed.elements[row][col]
+                #mat_transposed = self.transpose()
+                #return mat_transposed.elements[row][col]
+                return self.elements[col][row]
 
         # elements are in dict
         elif isinstance(self, MatrixSparse):
@@ -116,62 +117,58 @@ class Matrix:
 
         return new_matrix
 
-    def add_matrix(self, other, matrix_type):
+    def add_matrix(self, other):
         '''
         Parameters: 
             self, other: (Matrix instances)
-            matrix_type: (string) Matrix subclass of returned Matrix object
         Returns:
-            matrix_add: (Matrix instance)
+            matrix_add: (Matrix instance) Defaults to MatrixRows shape
         '''
         # check that dimensions of self and other are equal
         if (self.num_rows != other.num_rows and self.num_cols != other.num_cols):
             print("Matrices must be same dimension.")
         else:
-            matrix_add = Matrix(elements=[], num_rows=0, num_cols=0)
+            matrix_add = Matrix(elements=[], num_rows=self.num_rows, num_cols=self.num_cols)
 
-            rows = 0
-            cols = 0
+            i = 0
+            j = 0
 
             # add matching elements of self and other
-            while rows < self.num_rows:
-                while cols < self.num_cols:
-                    sum_elements = self.get_element(rows, cols) + other.get_element(rows, cols)
+            while i < self.num_rows:
+                while j < self.num_cols:
+                    sum_elements = self.get_value(i, j) + other.get_value(i, j)
                     matrix_add.elements.append(sum_elements)
-                    cols += 1
-                rows += 1
-                cols = 0
+                    j += 1
+                i += 1
+                j = 0
+            
+            # change to default shape
+            matrix_add = matrix_add.change_matrix_shape(MatrixRows)
 
-            # organize matrix_add.elements by row, col, or dict
-            if matrix_type == MatrixRows:
-                matrix_add = MatrixRows(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-            elif matrix_type == MatrixCols:
-                matrix_add = MatrixCols(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-            else:
-                matrix_add = MatrixSparse(elements=matrix_add.elements, num_rows=self.num_rows, num_cols=self.num_cols)
-                
             return matrix_add
 
-    def subtract_matrix(self, other, matrix_type):
+    def subtract_matrix(self, other):
         '''
         Parameters: 
             self, other: (Matrix instances)
-            matrix_type: (string) Matrix subclass of returned Matrix object
         Returns:
-            matrix_subtract: (Matrix instance)
+            sub_matrix: (Matrix instance) Defaults to MatrixRows shape
         '''
-        other.scalar_multiply(-1)
-        return self.add_matrix(other, matrix_type)
+        other = other.scalar_multiply(-1)
+        sub_matrix = self.add_matrix(other)
+
+        return sub_matrix
     
     def scalar_multiply(self, num):
         '''
         Parameters:
             num: (int or float) number to multiply against self
         Returns:
-            mat_scaled: (Matrix object) new matrix object
+            mat_scaled: (Matrix object) new matrix object with same shape as self
         '''
         # create a new matrix object
-        mat_scaled = Matrix(elements=[], num_rows=0, num_cols=0)
+        matrix_type = type(self)
+        mat_scaled = matrix_type(elements=[], num_rows=0, num_cols=0)
         
         # check type of self - nested list
         if isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
@@ -190,7 +187,6 @@ class Matrix:
         
         elif isinstance(self, MatrixSparse): # dict
             mat_scaled.elements = self.elements.copy()
-            print(mat_scaled.elements)
 
             for key in mat_scaled.elements.keys():
                 mat_scaled.elements[key] *= num
@@ -212,7 +208,7 @@ class Matrix:
         Parameters:
             num: (int or float) number to divide against self
         Returns:
-            mat_scaled: (Matrix object) new matrix object
+            mat_scaled: (Matrix object) new matrix object with same shape as self
         '''
         new_num = 1/num
         return self.scalar_multiply(new_num)
@@ -246,22 +242,19 @@ class Matrix:
 
         else:
             sliced_elements = []
-            i = 0
 
             # if slicing a single row
             if row_start == row_finish:
-                while i < (col_finish + 1):
-                    element = self.get_element(row_start, col_start)
+                while col_start < (col_finish + 1):
+                    element = self.get_value(row_start, col_start)
                     sliced_elements.append(element)
-                    i += 1
                     col_start += 1
         
             # if slicing a single col
             elif col_start == col_finish:
-                while i < (row_finish + 1):
-                    element = self.get_element(row_start, col_start)
+                while row_start < (row_finish + 1):
+                    element = self.get_value(row_start, col_start)
                     sliced_elements.append(element)
-                    i += 1
                     row_start += 1
 
             # if slicing rows and columns
@@ -273,7 +266,7 @@ class Matrix:
 
                 while i < (row_finish + 1):
                     while j < (col_finish + 1):
-                        element = self.get_element(row_start, col_start)
+                        element = self.get_value(row_start, col_start)
                         sliced_elements[i].append(element)
                         j += 1
                         col_start += 1
@@ -302,19 +295,39 @@ class Matrix:
                 dot_product += row[i] * col[i]
                 i += 1
         
-        return dot_product
+            return dot_product
 
 
-    def multiply_matrix(self, other, matrix_type):
+    def multiply_matrix(self, other):
         '''
         Parameters: 
             self, other: (Matrix instances)
-            matrix_type: (string) Matrix subclass of returned Matrix object
         Returns:
-            matrix_multiply: (Matrix instance)
-        TODO: Use dot_product() to perform each row/col operation
+            mult_matrix: (Matrix instance) defaults to MatrixRows shape
         '''
-        pass
+        # check that dimensions are compatible for multiplication
+        if self.num_cols != other.num_rows:
+            ("Number of columns of matrix A must equal number of rows of matrix B in A * B.")
+        
+        else:
+            # create new Matrix instance
+            new_matrix = Matrix(elements=[], num_rows=self.num_rows, num_cols=other.num_cols)
+            i = 0
+            j = 0
+
+            while i < self.num_rows:
+                while j < other.num_cols:
+                    row = self.slice_matrix(i, i, 0, self.num_cols - 1)
+                    col = other.slice_matrix(0, other.num_rows - 1, j, j)
+                    element = self.dot_product(row, col)
+                    new_matrix.elements.append(element)
+                    j += 1
+                i += 1
+                j = 0
+            
+            mult_matrix = new_matrix.change_matrix_shape(MatrixRows)
+
+            return mult_matrix
 
 
     def multiply_n_matrices(self, other_list):
@@ -372,13 +385,14 @@ class MatrixSparse(Matrix):
 
         while i < self.num_rows:
             while j < self.num_cols:
-                element = self.get_element(i, j)
+                element = self.get_value(i, j)
                 lst_elements.append(element)
                 j += 1
             i += 1
             j = 0
         
         return lst_elements
+
 
 class MatrixRows(Matrix):
     def __init__(self, **kwargs):
@@ -441,14 +455,14 @@ class MatrixCols(Matrix):
     
 
 # TESTS
-mat_sparse = MatrixSparse(elements=[0, 0, 0, 4, 0, 0, 5, 0, 6], num_rows=3, num_cols=3)
+mat_sparse = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
 mat_sparse_2 = MatrixSparse(elements = [0, 3, 0, 0, 1, 0, 0, 0, 2], num_rows=3, num_cols=3)
 mat_rows = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_rows_copy = MatrixRows(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_cols = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_cols_copy = MatrixCols(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
 mat_simple = Matrix(elements=[1, 2, 3, 4, 5, 6, 7, 8, 9], num_rows=3, num_cols=3)
-mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_cols=3)
+mat_simple2 = Matrix(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_cols=3)
 
 #mat_sparse.elements = {(1, 0): 4, (2, 0): 5, (2, 2): 6}
 #mat_sparse_2.elements = {(0, 1): 3, (1, 1): 2, (2, 2): 2}
@@ -456,18 +470,21 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 #mat_cols.elements = [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
 
 # test add_matrix()
-# new_mat = mat_rows.add_matrix(mat_cols, MatrixCols)
-# print(new_mat.elements)
-
-
-# test subtract_matrix()
-# new_mat = mat_rows.subtract_matrix(mat_simple2, MatrixRows)
-# print(new_mat.elements)
-
+#new_mat = mat_sparse.add_matrix(mat_simple)
+#print(new_mat.elements)
 
 # test scalar_multiply()
-# new_mat = mat_simple.scalar_multiply(3)
-# print(new_mat.elements)
+#new_mat = mat_rows.scalar_multiply(0)
+#print(new_mat.elements)
+
+# test subtract_matrix()
+#sub1 = mat_rows.subtract_matrix(mat_simple)
+#sub2 = mat_sparse.subtract_matrix(mat_cols)
+#sub3 = mat_simple.subtract_matrix(mat_sparse)
+
+#print(sub1.elements)
+#print(sub2.elements)
+#print(sub3.elements)
 
 
 # test scalar_divide()
@@ -476,17 +493,28 @@ mat_simple2 = MatrixRows(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, 
 
 
 # test dot_product()
-#new_mat = mat_rows.dot_product(mat_simple2, MatrixRows)
-#print(new_mat.elements)
+#slice1 = mat_simple.slice_matrix(0, 0, 0, 2)
+#slice2 = mat_sparse.slice_matrix(1, 2, 0, 0)
+#slice3 = mat_rows.slice_matrix(0, 2, 1, 1)
+#print(mat_simple.dot_product(slice1, slice2))
+
+
 
 # test slice_matrix()
+#print(mat_simple.slice_matrix(0, 2, 1, 2))
 #print(mat_sparse.slice_matrix(1, 2, 1, 2))
+#print(mat_rows.slice_matrix(2, 2, 0, 2))
+#print(mat_cols.slice_matrix(0, 0, 1, 2))
 
 # test change_matrix_shape()
-test1 = mat_simple.change_matrix_shape(MatrixRows)
-test2 = mat_rows.change_matrix_shape(MatrixSparse)
-test3 = mat_sparse.change_matrix_shape(MatrixCols)
-print(test3.elements)
+#test1 = mat_simple.change_matrix_shape(MatrixRows)
+#test2 = mat_simple.change_matrix_shape(MatrixSparse)
+#test3 = mat_sparse.change_matrix_shape(MatrixCols)
+#print(test2.elements)
 
 # test get_element_lst()
 #print(mat_sparse.get_elements_lst())
+
+# test multiply_matrix()
+mult1 = mat_sparse_2.multiply_matrix(mat_sparse)
+print(mult1.elements)
