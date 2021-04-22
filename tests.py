@@ -229,14 +229,19 @@ class TestMatrixCols(unittest.TestCase):
 
 class TestMatrixSparse(unittest.TestCase):
 
+    def test_createdict(self):
+        x = test_MatrixSparse_instance()
+        self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
+
     def test_setdict(self):
         x = test_MatrixSparse_instance()
         self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
 
+    def test_getdctlst(self):
+        x = test_MatrixSparse_instance()
+        self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
 
     
-
-
 
 if __name__ == "__main__":
     unittest.main(verbosity = 2)
