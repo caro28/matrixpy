@@ -223,22 +223,26 @@ class Matrix:
         '''
         # check Matrix instance type
         if isinstance(self, MatrixSparse):
-            sliced_elements = {}
-            sliced_keys = []
-            sliced_values = []
-            for key in self.elements.keys():
-                # key/value pairs to include in slice
-                if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
-                    sliced_keys.append(key)
-                    sliced_values.append(self.elements[key])
+            sliced_elements = self.get_dct_lst()
+
+            # sliced_elements = {}
+            # sliced_keys = []
+            # sliced_values = []
+            # for key in self.elements.keys():
+            #     # key/value pairs to include in slice
+            #     if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
+            #         sliced_keys.append(key)
+            #         sliced_values.append(self.elements[key])
                 
-                else:
-                    # TODO: pass or continue here?
-                    continue
+            #     else:
+            #         # TODO: pass or continue here?
+            #         continue
             
-            # populate dict
-            for i in range(len(sliced_keys)):
-                sliced_elements[sliced_keys[i]] = sliced_values[i]
+            # # populate dict
+            # for i in range(len(sliced_keys)):
+            #     sliced_elements[sliced_keys[i]] = sliced_values[i]
+            
+            
 
         else:
             sliced_elements = []
@@ -285,6 +289,14 @@ class Matrix:
         Returns:
             dot_product (int or float)
         '''
+        # This is just a test ----------> delete after figuring out bug
+        if type(row).__name__ == 'dict':
+            print("row is a dict: do something")
+
+        if type(col).__name__ == 'dict':
+            print("col is a dict: do something")
+        
+
         # check that dimensions of row and col are equal
         if len(row) != len(col):
             print("Inputs must be same dimension.")
@@ -493,10 +505,11 @@ mat_simple2 = Matrix(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_
 
 
 # test dot_product()
-#slice1 = mat_simple.slice_matrix(0, 0, 0, 2)
-#slice2 = mat_sparse.slice_matrix(1, 2, 0, 0)
-#slice3 = mat_rows.slice_matrix(0, 2, 1, 1)
-#print(mat_simple.dot_product(slice1, slice2))
+slice1 = mat_simple.slice_matrix(0, 0, 0, 2)
+slice2 = mat_sparse.slice_matrix(1, 2, 0, 0)
+slice3 = mat_rows.slice_matrix(0, 2, 1, 1)
+print(slice2)
+print(mat_sparse.dot_product(slice2, slice2))
 
 
 
@@ -507,10 +520,10 @@ mat_simple2 = Matrix(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_
 #print(mat_cols.slice_matrix(0, 0, 1, 2))
 
 # test change_matrix_shape()
-#test1 = mat_simple.change_matrix_shape(MatrixRows)
-#test2 = mat_simple.change_matrix_shape(MatrixSparse)
-#test3 = mat_sparse.change_matrix_shape(MatrixCols)
-#print(test2.elements)
+# test1 = mat_simple.change_matrix_shape(MatrixRows)
+# test2 = mat_simple.change_matrix_shape(MatrixSparse)
+# test3 = mat_sparse.change_matrix_shape(MatrixCols)
+# print(test2.elements)
 
 # test get_element_lst()
 #print(mat_sparse.get_elements_lst())
