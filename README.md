@@ -1,77 +1,41 @@
-# matrixpy
+## MatrixPy
 
-What we need to write here: "A Markdown-formatted description of the package’s overall purpose, the organization of the package code in the repository, and some simple examples of usage."
-
-Project Titlegit 
-One Paragraph of project description goes here
+MatrixPy is a package designed to represent matrices of various dimensions, along with main matrix operations such as addition, subtraction, scalar multiplication, scalar division, dot product, matrix multiplication and transposition.
 
 
+## Installation
+
+Please make sure you have the latest 3.x version from [python.org](https://www.python.org/)
+
+1. On the main page of this repo, click on the "code" button right above the list of files.
+2. Copy the link provided in the textbox.
+3. In your terminal, select the location where you want the cloned repo to be
+4. Type `git clone`, and then paste the URL you copied earlier.
+5. Press **Enter**.
 
 
-#Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## How to Use
+xxx
 
 
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
+
+## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
+
+e.g.  
+Contributions to this package are well accepted! Please follow the instructions below:  
+1. Clone repo and create a new branch.
+2. Make necessary changes and test.
+3. Submit Pull Request with comprehensive description of your changes.
+
+## Authors and acknowledgment
+Caroline Craig
+Nabyla Tanaka
 
 
-Prerequisites
-What things you need to install the software and how to install them
-
-Give examples
-
-Installing
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-Give the example
-And repeat
-
-until finished
-
-End with an example of getting some data out of the system or using it for a little demo
-
-
-
-
-#Running the tests
-Explain how to run the automated tests for this system
-
-Break down into end to end tests
-Explain what these tests test and why
-
-Give an example
-And coding style tests
-Explain what these tests test and why
-
-Give an example
-
-
-
-#Deployment
-Add additional notes about how to deploy this on a live system
-
-Built With
-Dropwizard - The web framework used
-Maven - Dependency Management
-ROME - Used to generate RSS Feeds
-Contributing
-Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests to us.
-
-
-
-#Versioning
-We use SemVer for versioning. For the versions available, see the tags on this repository.
-
-#Authors
-Billie Thompson - Initial work - PurpleBooth
-See also the list of contributors who participated in this project.
-
-#License
-This project is licensed under the MIT License - see the LICENSE.md file for details
-
-#Acknowledgments
-Hat tip to anyone whose code was used
-Inspiration
-etc
 
