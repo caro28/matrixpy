@@ -29,7 +29,7 @@ class Matrix:
     def change_matrix_shape(self, matrix_type):
         '''
         Parameters:
-            matrix_type: (str) requested Matrix subclass of output
+            matrix_type: (str) Matrix subclass of output (MatrixRows, MatrixCols, MatrixSparse)
         Returns:
             new matrix object
         '''
@@ -37,19 +37,7 @@ class Matrix:
         if isinstance(self, matrix_type):
             print("matrix_type must be a different Matrix subclass")
         
-        # convert input data type to simple list
-        # TODO: do get_dct_lst() and get_simple_lst() need to go under Matrix parent class? 
-        # Getting error message (without impacting code) that Matrix has no 'member' corresponding to these methods.
-        elif isinstance(self, MatrixSparse):
-            simple_lst = self.get_dct_lst()
-
-        elif isinstance(self, MatrixRows) or isinstance(self, MatrixCols):
-            simple_lst = self.get_simple_lst()
-        
-        else:
-            simple_lst = self.elements
-
-        return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
+        return matrix_type(elements=self.elements, num_rows=self.num_rows, num_cols=self.num_cols)
 
 
     def get_value(self, row, col):
@@ -113,7 +101,7 @@ class Matrix:
 
         new_matrix.elements = nested_lst
         new_matrix.set_numrows(self.num_cols)
-        new_matrix.set_numcols(self.set_numrows)
+        new_matrix.set_numcols(self.num_rows)
 
         return new_matrix
 
@@ -223,27 +211,19 @@ class Matrix:
         '''
         # check Matrix instance type
         if isinstance(self, MatrixSparse):
-            sliced_elements = self.get_dct_lst()
-
-            # sliced_elements = {}
-            # sliced_keys = []
-            # sliced_values = []
-            # for key in self.elements.keys():
-            #     # key/value pairs to include in slice
-            #     if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
-            #         sliced_keys.append(key)
-            #         sliced_values.append(self.elements[key])
-                
-            #     else:
-            #         # TODO: pass or continue here?
-            #         continue
+            sliced_elements = {}
+            sliced_keys = []
+            sliced_values = []
+            for key in self.elements.keys():
+                # key/value pairs to include in slice
+                if key[0] >= row_start and key[0] <= row_finish and key[1] >= col_start and key[1] <= col_finish:
+                    sliced_keys.append(key)
+                    sliced_values.append(self.elements[key])
             
-            # # populate dict
-            # for i in range(len(sliced_keys)):
-            #     sliced_elements[sliced_keys[i]] = sliced_values[i]
+            # populate dict
+            for i in range(len(sliced_keys)):
+                sliced_elements[sliced_keys[i]] = sliced_values[i]
             
-            
-
         else:
             sliced_elements = []
 
@@ -282,32 +262,97 @@ class Matrix:
         return sliced_elements
 
 
-    def dot_product(self, row, col):
+    def dot_product(self, row, col, r_row_start, r_col_start, r_num_cols, c_row_start, c_col_start, c_num_rows):
         '''
         Parameters:
             row, col: (lists)
         Returns:
             dot_product (int or float)
         '''
-        # This is just a test ----------> delete after figuring out bug
-        if type(row).__name__ == 'dict':
-            print("row is a dict: do something")
+        # TODO: This is just a test ----------> delete after figuring out bug
+        #if type(row).__name__ == 'dict':
+            #print("row is a dict: do something")
 
-        if type(col).__name__ == 'dict':
-            print("col is a dict: do something")
+        #if type(col).__name__ == 'dict':
+            #print("col is a dict: do something")
         
+        dot_product = 0
+
+        if isinstance(row, dict):
+            keys_list = list(row)
+            row_list = []
+            i = 0
+            j = 0
+            #print(keys_list)
+
+            while i < r_num_cols:
+                while j < len(keys_list):
+                    #print(keys_list[j])
+                    #print(j)
+                #for key in row.keys():
+                    #print(keys_list[j] == tuple([r_row_start, r_col_start]))
+                    if keys_list[j] == tuple([r_row_start, r_col_start]):
+                    #if key == tuple([r_row_start, r_col_start]):
+                        row_list.append(row[keys_list[j]])
+                        #row_list.append(row[key])
+                        r_col_start += 1
+                        i += 1
+                        j += 1
+                    else:
+                        row_list.append(0)
+                        r_col_start += 1
+                        i += 1
+                        #j += 1
+                
+                #TODO - check ok to delete any of these below
+                if i == r_num_cols:
+                    i += 1
+                else:
+                    row_list.append(0)
+                    i += 1
+                
+            row = row_list
+            #print(row)
+        
+        if isinstance(col, dict):
+            keys_list = list(col)
+            col_list = []
+            i = 0
+            j = 0
+            while i < c_num_rows:
+                while j < len(keys_list):
+                    if keys_list[j] == tuple([c_row_start, c_col_start]):
+                        col_list.append(col[keys_list[j]])
+                        c_row_start += 1
+                        i += 1
+                        j += 1
+                    else:
+                        col_list.append(0)
+                        c_row_start += 1
+                        i += 1
+                        #j += 1
+                
+                if i == c_num_rows:
+                    i += 1
+                else:
+                    col_list.append(0)
+                    i += 1
+            
+            col = col_list
 
         # check that dimensions of row and col are equal
         if len(row) != len(col):
             print("Inputs must be same dimension.")
         else:
             i = 0
-            dot_product = 0
+            #TODO-delete: dot_product = 0
             while i < len(row):
                 dot_product += row[i] * col[i]
+                #print(row[i])
+                #print(col[i])
                 i += 1
         
-            return dot_product
+        return dot_product
 
 
     def multiply_matrix(self, other):
@@ -331,7 +376,7 @@ class Matrix:
                 while j < other.num_cols:
                     row = self.slice_matrix(i, i, 0, self.num_cols - 1)
                     col = other.slice_matrix(0, other.num_rows - 1, j, j)
-                    element = self.dot_product(row, col)
+                    element = self.dot_product(row, col, i, 0, self.num_cols, 0, j, other.num_rows)
                     new_matrix.elements.append(element)
                     j += 1
                 i += 1
@@ -340,13 +385,6 @@ class Matrix:
             mult_matrix = new_matrix.change_matrix_shape(MatrixRows)
 
             return mult_matrix
-
-
-    def multiply_n_matrices(self, other_list):
-        '''
-        TODO: build this? method to multiply more than one matrix?
-        '''
-        pass
 
 
 class MatrixSparse(Matrix):
@@ -404,6 +442,23 @@ class MatrixSparse(Matrix):
             j = 0
         
         return lst_elements
+  
+    def change_matrix_shape(self, matrix_type):
+        '''
+        Parameters:
+            matrix_type: (str) Matrix subclass of output (MatrixRows, MatrixCols, MatrixSparse)
+        Returns:
+            new matrix object
+        '''
+        # print error message if matrix_type == type(self)
+        if isinstance(self, matrix_type):
+            print("matrix_type must be a different Matrix subclass")
+        
+        # convert dict to simple list
+        else:
+            simple_lst = self.get_dct_lst()
+
+            return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
 
 
 class MatrixRows(Matrix):
@@ -429,6 +484,23 @@ class MatrixRows(Matrix):
     
     def get_simple_lst(self):
         return nstd_to_simple(self.elements, self.num_rows, self.num_cols)
+    
+    def change_matrix_shape(self, matrix_type):
+        '''
+        Parameters:
+            matrix_type: (str) Matrix subclass of output (MatrixRows, MatrixCols, MatrixSparse)
+        Returns:
+            new matrix object
+        '''
+        # print error message if matrix_type == type(self)
+        if isinstance(self, matrix_type):
+            print("matrix_type must be a different Matrix subclass")
+        
+        # convert input data type to simple list
+        else:
+            simple_lst = self.get_simple_lst()
+            
+            return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
 
 
 class MatrixCols(Matrix):
@@ -460,11 +532,31 @@ class MatrixCols(Matrix):
 
         self.elements = nested_lst_cols
     
-    # TODO: ok to use same name as in MatrixRows?
+
     def get_simple_lst(self):
-        transposed = self.transpose()
-        return nstd_to_simple(transposed.set_elements, transposed.num_rows, transposed.num_cols)
+        new_mat = self.transpose()
+
+        return nstd_to_simple(new_mat.elements, new_mat.num_rows, new_mat.num_cols)
     
+
+    def change_matrix_shape(self, matrix_type):
+        '''
+        Parameters:
+            matrix_type: (str) Matrix subclass of output (MatrixRows, MatrixCols, MatrixSparse)
+        Returns:
+            new matrix object
+        '''
+        # print error message if matrix_type == type(self)
+        if isinstance(self, matrix_type):
+            print("matrix_type must be a different Matrix subclass")
+
+        # convert input data type to simple list
+        else:
+            simple_lst = self.get_simple_lst()
+
+            return matrix_type(elements=simple_lst, num_rows=self.num_rows, num_cols=self.num_cols)
+    
+
 
 # TESTS
 mat_sparse = MatrixSparse(elements=[0, 0, 0, 3, 0, 0, 5, 0, 3], num_rows=3, num_cols=3)
@@ -505,11 +597,12 @@ mat_simple2 = Matrix(elements=[2, 4, 6, 8, 10, 12, 14, 16, 18], num_rows=3, num_
 
 
 # test dot_product()
-slice1 = mat_simple.slice_matrix(0, 0, 0, 2)
-slice2 = mat_sparse.slice_matrix(1, 2, 0, 0)
-slice3 = mat_rows.slice_matrix(0, 2, 1, 1)
-print(slice2)
-print(mat_sparse.dot_product(slice2, slice2))
+#slice1 = mat_simple.slice_matrix(0, 2, 2, 2)
+#slice2 = mat_sparse.slice_matrix(2, 2, 0, 2)
+#slice3 = mat_rows.slice_matrix(0, 2, 1, 1)
+#slice4 = mat_sparse_2.slice_matrix(0, 2, 1, 1)
+#print(slice2)
+#print(mat_sparse.dot_product(slice2, slice3, 2, 0, 3, 0, 1, 3))
 
 
 
@@ -520,14 +613,14 @@ print(mat_sparse.dot_product(slice2, slice2))
 #print(mat_cols.slice_matrix(0, 0, 1, 2))
 
 # test change_matrix_shape()
-# test1 = mat_simple.change_matrix_shape(MatrixRows)
+#test1 = mat_simple.change_matrix_shape(MatrixRows)
 # test2 = mat_simple.change_matrix_shape(MatrixSparse)
-# test3 = mat_sparse.change_matrix_shape(MatrixCols)
-# print(test2.elements)
+test3 = mat_cols.change_matrix_shape(MatrixRows)
+print(test3.elements)
 
 # test get_element_lst()
 #print(mat_sparse.get_elements_lst())
 
 # test multiply_matrix()
-mult1 = mat_sparse_2.multiply_matrix(mat_sparse)
-print(mult1.elements)
+#mult1 = mat_simple.multiply_matrix(mat_rows)
+#print(mult1.elements)

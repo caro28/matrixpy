@@ -152,95 +152,70 @@ class TestMatrix(unittest.TestCase):
         x2 = test_MatrixSparse_instance()
         x3 = test_MatrixRows_instance()
         slice1 = x1.slice_matrix(0, 0, 0, 2)
-        slice2 = x2.slice_matrix(1, 2, 0, 0)
+        slice2 = x2.slice_matrix(2, 2, 0, 2)
         slice3 = x3.slice_matrix(0, 2, 1, 1)
-        self.assertEqual(x1.dot_product(slice1, slice3), 36)
-        self.assertEqual(x1.dot_product(slice1, slice2), None)
+        self.assertEqual(x1.dot_product(slice1, slice3, 0, 0, x1.num_cols, 0, 1, x3.num_rows), 36)
+        self.assertEqual(x2.dot_product(slice2, slice3, 2, 0, x2.num_cols, 0, 1, x3.num_rows), 34)
 
     def test_multiplymatrix(self):
         x1 = test_Matrix_instance()
         x2 = test_MatrixSparse_instance()
         x3 = test_MatrixRows_instance()
         x4 = test_MatrixCols_instance()
-        self.assertEqual(x1.multiply_matrix(x3), [[30, 36, 42], [66, 81, 96], [102, 126, 150]])
-        self.assertEqual(x2.multiply_matrix(x4), )
-
-    def test_multiplynmatrix(self):
-        x = test_Matrix_instance()                              
-
-
-class TestMatrixRows(unittest.TestCase):
-    '''
-    Do not test set_elements(self) because set_rows() has already been called
-    '''
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_setnumrows(self):
-        x = test_MatrixRows_instance()
-        self.assertEqual(x.num_rows, 3)
-    
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_setnumcols(self):
-        x = test_MatrixRows_instance()
-        self.assertEqual(x.num_cols, 3)
-
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_getelements(self):
-        x = test_MatrixRows_instance()
-        self.assertEqual(x.get_elements(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-
-    def test_setrows(self):
-        x = test_MatrixRows_instance()
-        self.assertEqual(x.elements, [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-
-    def test_getsimplelst(self):
-        x = test_MatrixRows_instance()
-        self.assertEqual(x.elements, [[1, 2, 3], [4, 5, 6], [7, 8, 9]])    
-
-
-
-class TestMatrixCols(unittest.TestCase):
-    '''
-    Do not test set_elements(self) because set_cols() has already been called
-    '''
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_setnumrows(self):
-        x = test_MatrixCols_instance()
-        self.assertEqual(x.num_rows, 3)
-    
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_setnumcols(self):
-        x = test_MatrixCols_instance()
-        self.assertEqual(x.num_cols, 3)
-
-    # TODO-question: not needed b/c already tested in parent class?
-    def test_getelements(self):
-        x = test_MatrixCols_instance()
-        self.assertEqual(x.get_elements(), [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
-
-    def test_setcols(self):
-        x = test_MatrixCols_instance()
-        self.assertEqual(x.elements, [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
-
-    def test_getsimplelst(self):
-        x = test_MatrixCols_instance()
-        self.assertEqual(x.elements, [[1, 4, 7], [2, 5, 8], [3, 6, 9]]) 
-          
+        self.assertEqual(x1.multiply_matrix(x3).get_elements(), [[30, 36, 42], [66, 81, 96], [102, 126, 150]])
+        self.assertEqual(x2.multiply_matrix(x4).get_elements(), [[0, 0, 0], [3, 6, 9], [26, 34, 42]])
 
 
 class TestMatrixSparse(unittest.TestCase):
-
-    def test_createdict(self):
-        x = test_MatrixSparse_instance()
-        self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
-
     def test_setdict(self):
         x = test_MatrixSparse_instance()
         self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
 
     def test_getdctlst(self):
         x = test_MatrixSparse_instance()
-        self.assertEqual(x.elements, {(1, 0): 3, (2, 0): 5, (2, 2): 3})
+        self.assertEqual(x.get_dct_lst(), [0, 0, 0, 3, 0, 0, 5, 0, 3])
+    
+    def test_changematrixshape(self):
+        x = test_MatrixSparse_instance()
+        y = test_MatrixSparse_instance()
+        self.assertEqual(x.change_matrix_shape(MatrixCols).get_elements(), [[0, 3, 5], [0, 0, 0], [0, 0, 3]])
+        self.assertEqual(y.change_matrix_shape(MatrixRows).get_elements(), [[0, 0, 0], [3, 0, 0], [5, 0, 3]])
 
+
+class TestMatrixRows(unittest.TestCase):
+    '''
+    Do not test set_elements(self) because set_rows() has already been called
+    '''
+    def test_setrows(self):
+        x = test_MatrixRows_instance()
+        self.assertEqual(x.elements, [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+    def test_getsimplelst(self):
+        x = test_MatrixRows_instance()
+        self.assertEqual(x.get_simple_lst(), [i for i in range(1, 10)])    
+
+    def test_changematrixshape(self):
+        x = test_MatrixRows_instance()
+        self.assertEqual(x.change_matrix_shape(MatrixCols).get_elements(), [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
+        self.assertEqual(x.change_matrix_shape(MatrixSparse).get_elements(), {(0, 0): 1, (0, 1): 2, (0, 2): 3, (1, 0): 4, (1, 1): 5, (1, 2): 6, (2, 0): 7, (2, 1): 8, (2, 2): 9})
+
+
+class TestMatrixCols(unittest.TestCase):
+    '''
+    Do not test set_elements(self) because set_cols() has already been called
+    '''
+    def test_setcols(self):
+        x = test_MatrixCols_instance()
+        self.assertEqual(x.elements, [[1, 4, 7], [2, 5, 8], [3, 6, 9]])
+
+    def test_getsimplelst(self):
+        x = test_MatrixCols_instance()
+        self.assertEqual(x.get_simple_lst(), [i for i in range(1, 10)])
+    
+    def test_changematrixshape(self):
+        x = test_MatrixCols_instance()
+        self.assertEqual(x.change_matrix_shape(MatrixRows).get_elements(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        self.assertEqual(x.change_matrix_shape(MatrixSparse).get_elements(), {(0, 0): 1, (0, 1): 2, (0, 2): 3, (1, 0): 4, (1, 1): 5, (1, 2): 6, (2, 0): 7, (2, 1): 8, (2, 2): 9})
     
 
 if __name__ == "__main__":
