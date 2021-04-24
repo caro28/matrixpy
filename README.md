@@ -41,7 +41,6 @@ If you would like to report any issues, please follow the instructions below:
 
 ## Roadmap
 If you have ideas for releases in the future, it is a good idea to list them in the README.
-![](Untitled.png)
 
 ## Contributing
 Contributions to this package are welcome! Please follow the instructions below:  
