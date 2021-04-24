@@ -40,7 +40,6 @@ If you would like to report any issues, please follow the instructions below:
 3. Click on "Submit new issue" and we will get back to you as soon as we can.
 
 ## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
 Possible improvements include adding more operations (e.g. calculate a matrix’s inverse and perform SVD) and by adding a broadcasting functionality.
 
 ## Contributing
