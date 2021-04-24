@@ -40,7 +40,7 @@ If you would like to report any issues, please follow the instructions below:
 3. Click on "Submit new issue" and we will get back to you as soon as we can.
 
 ## Roadmap
-Possible improvements include adding more operations (e.g. calculate a matrix’s inverse and perform SVD) and by adding a broadcasting functionality.
+Ways to improve MatrixPy include adding more operations (e.g. calculate a matrix’s inverse and perform SVD) and adding a broadcasting functionality.
 
 ## Contributing
 Contributions to this package are welcome! Please follow the instructions below:  
